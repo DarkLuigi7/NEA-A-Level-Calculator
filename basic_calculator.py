@@ -1,9 +1,9 @@
-from tkinter import *
-import time
-from fractions import Fraction
-import re
 # noinspection PyUnresolvedReferences
 import math
+import re
+from fractions import Fraction
+from tkinter import *
+import sympy as sp
 
 
 # import required libraries
@@ -16,7 +16,7 @@ class BasicCalculator:
         # create the basic calculator window as a toplevel window on top of the root window
         basicCalculatorWindow.title("Basic Calculator")
         # title the window
-        basicCalculatorWindow.geometry("290x420")
+        basicCalculatorWindow.geometry("290x475")
         # give the window its dimensions
         self.justcalculated = False
 
@@ -127,19 +127,19 @@ class BasicCalculator:
         buttondelete.config(font=("Courier New", 18))
 
         buttondown = Button(basicCalculatorWindow, text="↓", width=3, bg="ivory4", command=None, relief=RAISED)
-        buttondown.grid(row=3, column=1, padx=3, pady=3)
+        buttondown.grid(row=2, column=1, padx=3, pady=3)
         buttondown.config(font=("Courier New", 18))
 
         buttonup = Button(basicCalculatorWindow, text="↑", width=3, bg="ivory4", command=None, relief=RAISED)
-        buttonup.grid(row=2, column=1, padx=3, pady=3)
+        buttonup.grid(row=1, column=1, padx=3, pady=3)
         buttonup.config(font=("Courier New", 18))
 
-        buttonleft = Button(basicCalculatorWindow, text="←", width=3, bg="ivory4", command=None, relief=RAISED)
-        buttonleft.grid(row=3, column=0, padx=3, pady=3)
+        buttonleft = Button(basicCalculatorWindow, text="←", width=3, bg="ivory4", command=self.left, relief=RAISED)
+        buttonleft.grid(row=2, column=0, padx=3, pady=3)
         buttonleft.config(font=("Courier New", 18))
 
-        buttonright = Button(basicCalculatorWindow, text="→", width=3, bg="ivory4", command=None, relief=RAISED)
-        buttonright.grid(row=3, column=2, padx=3, pady=3)
+        buttonright = Button(basicCalculatorWindow, text="→", width=3, bg="ivory4", command=self.right, relief=RAISED)
+        buttonright.grid(row=2, column=2, padx=3, pady=3)
         buttonright.config(font=("Courier New", 18))
 
         buttonform = Button(basicCalculatorWindow, text="S⇔D", width=3, height=1, bg="black", fg="white", padx=6,
@@ -157,6 +157,21 @@ class BasicCalculator:
         buttonexponent.grid(row=5, column=4, padx=3, pady=3)
         buttonexponent.config(font=("Courier New", 18))
 
+        buttonsin = Button(basicCalculatorWindow, text="sin", width=3, bg="black", fg="white",
+                           command=lambda: self.ins("sin("), relief=RAISED)
+        buttonsin.grid(row=4, column=0, padx=3, pady=3)
+        buttonsin.config(font=("Courier New", 18))
+
+        buttoncos = Button(basicCalculatorWindow, text="cos", width=3, bg="black", fg="white",
+                           command=lambda: self.ins("cos("), relief=RAISED)
+        buttoncos.grid(row=4, column=1, padx=3, pady=3)
+        buttoncos.config(font=("Courier New", 18))
+
+        buttontan = Button(basicCalculatorWindow, text="tan", width=3, bg="black", fg="white",
+                           command=lambda: self.ins("tan("), relief=RAISED)
+        buttontan.grid(row=4, column=2, padx=3, pady=3)
+        buttontan.config(font=("Courier New", 18))
+
         buttonans = Button(basicCalculatorWindow, text="ANS", width=3, command=lambda: self.ins("ANS"), relief=RAISED)
         buttonans.grid(row=9, column=3, padx=3, pady=3)
         buttonans.config(font=("Courier New", 18))
@@ -166,14 +181,10 @@ class BasicCalculator:
         buttonpi.config(font=("Courier New", 18))
 
     def delete(self):
-        # this is the command to remove one character from the result box
         self.justcalculated = False
-        # set justcalculated to false, so when pressing any other button, do not insert ANS before it
-        x = self.resultbox.get()
-        self.resultbox.delete(0, "end")
-        y = x[:-1]
-        # remvoe everything from the result box and replace it with what it was previously minus one character
-        self.resultbox.insert(0, y)
+        pos = self.resultbox.index(INSERT)
+        if pos > 0:
+            self.resultbox.delete(pos - 1)
 
     def clear(self):
         # this is the command to clear the result box, either called manually by the user, or done before inserting
@@ -219,26 +230,63 @@ class BasicCalculator:
         self.ins("Error")
         self.resultbox.after(1000, lambda: self.clear_and_insert(result))
 
+    def right(self):
+        position = self.resultbox.index(INSERT) + 1
+        self.resultbox.icursor(position)
+
+    def left(self):
+        position = self.resultbox.index(INSERT) - 1
+        self.resultbox.icursor(position)
+
     def calculate(self):
         initialresult = self.resultbox.get()
         try:
             result = initialresult
+            result = result.replace("sin(", "sp.sin(")
+            print(result)
+            result = result.replace("cos(", "sp.cos(")
+            print(result)
+            result = result.replace("tan(", "sp.tan(")
+            print(result)
             result = re.sub(r'(\d|π|ANS)(\()', r'\1*(', result)
+            print(result)
             result = re.sub(r'(\))(\d|π|ANS)', r')*\2', result)
+            print(result)
             result = re.sub(r'(π|ANS)(\d)', r'\1*\2', result)
+            print(result)
             result = re.sub(r'(\d)(π|ANS)', r'\1*\2', result)
+            print(result)
             result = re.sub(r'(π|ANS)(ANS|π)', r'\1*\2', result)
+            print(result)
             result = re.sub(r'(\))\s*(\()', r')*(', result)
+            print(result)
             result = result.replace("ANS", "self.ANS")
-            result = result.replace("π", "math.pi")
+            print(result)
+            result = result.replace("π", "sp.pi")
+            print(result)
             result = result.replace("^", "**")
+            print(result)
             answer = eval(result)
+            print(answer)
+            print(type(answer))
             # evaluate the string in the result box
-            if answer.is_integer():
+            print(answer)
+            print(type(answer))
+            answer = sp.S(answer)
+            answer = answer.evalf()
+            print(answer)
+            print(type(answer))
+            if isinstance(answer, (sp.Integer, sp.core.numbers.One, sp.core.numbers.Zero, sp.core.numbers.NegativeOne)):
+                answer = int(answer)
+            elif isinstance(answer, sp.Float):
+                pass
+            elif answer.is_integer():
+                print(type(answer))
                 answer = int(answer)
                 # makes the numbers integers if possible, for example without this, if I did the calculation "1/1",
                 # I would have gotten 1.0. it is generally cleaner and more appealing to look at the result as a whole
                 # number if it is possible
+                print(answer)
             self.clear()
             # clear the result box
             self.ins(answer)
