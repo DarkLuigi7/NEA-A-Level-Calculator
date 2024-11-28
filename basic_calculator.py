@@ -3,24 +3,24 @@ import math
 import re
 from fractions import Fraction
 from tkinter import *
-import sympy as sp
-
+import sympy
+import math
 
 # import required libraries
 
-
 class BasicCalculator:
     def __init__(self, root):  # pass root as a parameter
-        basicCalculatorWindow = Toplevel(root)
-        basicCalculatorWindow.configure(bg="black")
+        self.root = root
+        self.basicCalculatorWindow = Toplevel(root)
+        self.basicCalculatorWindow.configure(bg="black")
         # create the basic calculator window as a toplevel window on top of the root window
-        basicCalculatorWindow.title("Basic Calculator")
+        self.basicCalculatorWindow.title("Basic Calculator")
         # title the window
-        basicCalculatorWindow.geometry("290x475")
+        self.basicCalculatorWindow.geometry("320x555")
         # give the window its dimensions
         self.justcalculated = False
 
-        resultbox = Entry(basicCalculatorWindow, borderwidth=5, relief=SUNKEN)
+        resultbox = Entry(self.basicCalculatorWindow, borderwidth=5, relief=SUNKEN)
         # create the entry / result box to display calculations
         resultbox.grid(row=0, column=0, columnspan=6, pady=5)
         # place the entry box on the window
@@ -33,158 +33,112 @@ class BasicCalculator:
         # create an empty array to store previous answers
         self.answers_index = -1
         self.ANS = 0
-
+        self.shift = False
+        self.drawbuttons()
         # the following buttons are the number and symbol keys of the keyboard, they all function the same
+        # they work by using the ins() function to insert a certain character or string into the result box
 
-        button1 = Button(basicCalculatorWindow, text="1", width=3, command=lambda: self.ins("1"), relief=RAISED)
-        # the command calls on the insert function of the class to insert the number 1 into the text box
-        button1.grid(row=8, column=0, padx=3, pady=3)
-        # place the button in the correct position
-        button1.config(font=("Courier New", 18))
+    def createbutton(self, name, text, width, x, y, padx, pady, fontsize, command, commandparameters, bg, fg, shiftname,
+                     shiftcommand, shiftparameters):
+        root = self.basicCalculatorWindow
+        if self.shift:
+            name = shiftname if shiftname is not None else name
+            text = shiftname if shiftname is not None else text
+            command = shiftcommand if shiftcommand is not None else command
+            commandparameters = shiftparameters if shiftparameters is not None else commandparameters
+        if commandparameters is not None:
+            button_command = lambda: command(commandparameters)
+        else:
+            button_command = command
+        button = Button(root, text=text, width=width, bg=bg, fg=fg,
+                             command=button_command, relief=RAISED)
+        button.grid(row=y, column=x, padx=padx, pady=pady)
+        button.config(font=("Courier New", fontsize))
 
-        button2 = Button(basicCalculatorWindow, text="2", width=3, command=lambda: self.ins("2"), relief=RAISED)
-        button2.grid(row=8, column=1, padx=3, pady=3)
-        button2.config(font=("Courier New", 18))
 
-        button3 = Button(basicCalculatorWindow, text="3", width=3, command=lambda: self.ins("3"), relief=RAISED)
-        button3.grid(row=8, column=2, padx=3, pady=3)
-        button3.config(font=("Courier New", 18))
 
-        button4 = Button(basicCalculatorWindow, text="4", width=3, command=lambda: self.ins("4"), relief=RAISED)
-        button4.grid(row=7, column=0, padx=3, pady=3)
-        button4.config(font=("Courier New", 18))
-
-        button5 = Button(basicCalculatorWindow, text="5", width=3, command=lambda: self.ins("5"), relief=RAISED)
-        button5.grid(row=7, column=1, padx=3, pady=3)
-        button5.config(font=("Courier New", 18))
-
-        button6 = Button(basicCalculatorWindow, text="6", width=3, command=lambda: self.ins("6"), relief=RAISED)
-        button6.grid(row=7, column=2, padx=3, pady=3)
-        button6.config(font=("Courier New", 18))
-
-        button7 = Button(basicCalculatorWindow, text="7", width=3, command=lambda: self.ins("7"), relief=RAISED)
-        button7.grid(row=6, column=0, padx=3, pady=3)
-        button7.config(font=("Courier New", 18))
-
-        button8 = Button(basicCalculatorWindow, text="8", width=3, command=lambda: self.ins("8"), relief=RAISED)
-        button8.grid(row=6, column=1, padx=3, pady=3)
-        button8.config(font=("Courier New", 18))
-
-        button9 = Button(basicCalculatorWindow, text="9", width=3, command=lambda: self.ins("9"), relief=RAISED)
-        button9.grid(row=6, column=2, padx=3, pady=3)
-        button9.config(font=("Courier New", 18))
-
-        button0 = Button(basicCalculatorWindow, text="0", width=3, command=lambda: self.ins("0"), relief=RAISED)
-        button0.grid(row=9, column=0, padx=3, pady=3)
-        button0.config(font=("Courier New", 18))
-
-        buttondot = Button(basicCalculatorWindow, text=".", width=3, command=lambda: self.ins("."), relief=RAISED)
-        buttondot.grid(row=9, column=1, padx=3, pady=3)
-        buttondot.config(font=("Courier New", 18))
-
-        buttonadd = Button(basicCalculatorWindow, text="+", width=3, command=lambda: self.ins("+"), relief=RAISED)
-        buttonadd.grid(row=8, column=3, padx=3, pady=3)
-        buttonadd.config(font=("Courier New", 18))
-
-        buttonmult = Button(basicCalculatorWindow, text="*", width=3, command=lambda: self.ins("*"), relief=RAISED)
-        buttonmult.grid(row=7, column=3, padx=3, pady=3)
-        buttonmult.config(font=("Courier New", 18))
-
-        buttonsub = Button(basicCalculatorWindow, text="-", width=3, command=lambda: self.ins("-"), relief=RAISED)
-        buttonsub.grid(row=8, column=4, padx=3, pady=3)
-        buttonsub.config(font=("Courier New", 18))
-
-        buttondiv = Button(basicCalculatorWindow, text="/", width=3, command=lambda: self.ins("/"), relief=RAISED)
-        buttondiv.grid(row=7, column=4, padx=3, pady=3)
-        buttondiv.config(font=("Courier New", 18))
-
-        buttonopenbr = Button(basicCalculatorWindow, text="(", width=3, bg="black", fg="white",
-                              command=lambda: self.ins("("), relief=RAISED)
-        buttonopenbr.grid(row=5, column=1, padx=3, pady=3)
-        buttonopenbr.config(font=("Courier New", 18))
-
-        buttonclosebr = Button(basicCalculatorWindow, text=")", width=3, bg="black", fg="white",
-                               command=lambda: self.ins(")"), relief=RAISED)
-        buttonclosebr.grid(row=5, column=2, padx=3, pady=3)
-        buttonclosebr.config(font=("Courier New", 18))
-
-        buttonexe = Button(basicCalculatorWindow, text="EXE", width=3, fg="royalblue3",
-                           command=lambda: self.calculate(), relief=RAISED)
-        # this command calls on the calculate function to calculate the contents of the result box
-        buttonexe.grid(row=9, column=4, padx=3, pady=3)
-        buttonexe.config(font=("Courier New", 18))
-
-        buttonclear = Button(basicCalculatorWindow, text="AC", width=3, bg="royalblue3", command=lambda: self.clear(),
-                             relief=RAISED)
-        # this command calls on the clear function to clear the result box
-        buttonclear.grid(row=6, column=4, padx=3, pady=3)
-        buttonclear.config(font=("Courier New", 18))
-
-        buttondelete = Button(basicCalculatorWindow, text="DEL", width=3, bg="royalblue3",
-                              command=lambda: self.delete(), relief=RAISED)
-        # this command calls on the delete function to remove one character from the result box
-        buttondelete.grid(row=6, column=3, padx=3, pady=3)
-        buttondelete.config(font=("Courier New", 18))
-
-        buttondown = Button(basicCalculatorWindow, text="↓", width=3, bg="ivory4", command=None, relief=RAISED)
-        buttondown.grid(row=2, column=1, padx=3, pady=3)
-        buttondown.config(font=("Courier New", 18))
-
-        buttonup = Button(basicCalculatorWindow, text="↑", width=3, bg="ivory4", command=None, relief=RAISED)
-        buttonup.grid(row=1, column=1, padx=3, pady=3)
-        buttonup.config(font=("Courier New", 18))
-
-        buttonleft = Button(basicCalculatorWindow, text="←", width=3, bg="ivory4", command=self.left, relief=RAISED)
-        buttonleft.grid(row=2, column=0, padx=3, pady=3)
-        buttonleft.config(font=("Courier New", 18))
-
-        buttonright = Button(basicCalculatorWindow, text="→", width=3, bg="ivory4", command=self.right, relief=RAISED)
-        buttonright.grid(row=2, column=2, padx=3, pady=3)
-        buttonright.config(font=("Courier New", 18))
-
-        buttonform = Button(basicCalculatorWindow, text="S⇔D", width=3, height=1, bg="black", fg="white", padx=6,
-                            pady=6, command=lambda: self.form(), relief=RAISED)
-        buttonform.grid(row=5, column=0, padx=3, pady=3)
-        buttonform.config(font=("Courier New", 13))
-
-        buttonsquared = Button(basicCalculatorWindow, text="^2", width=3, bg="black", fg="white",
-                               command=lambda: self.ins("^2"), relief=RAISED)
-        buttonsquared.grid(row=5, column=3, padx=3, pady=3)
-        buttonsquared.config(font=("Courier New", 18))
-
-        buttonexponent = Button(basicCalculatorWindow, text="^", width=3, bg="black", fg="white",
-                                command=lambda: self.ins("^"), relief=RAISED)
-        buttonexponent.grid(row=5, column=4, padx=3, pady=3)
-        buttonexponent.config(font=("Courier New", 18))
-
-        buttonsin = Button(basicCalculatorWindow, text="sin", width=3, bg="black", fg="white",
-                           command=lambda: self.ins("sin("), relief=RAISED)
-        buttonsin.grid(row=4, column=0, padx=3, pady=3)
-        buttonsin.config(font=("Courier New", 18))
-
-        buttoncos = Button(basicCalculatorWindow, text="cos", width=3, bg="black", fg="white",
-                           command=lambda: self.ins("cos("), relief=RAISED)
-        buttoncos.grid(row=4, column=1, padx=3, pady=3)
-        buttoncos.config(font=("Courier New", 18))
-
-        buttontan = Button(basicCalculatorWindow, text="tan", width=3, bg="black", fg="white",
-                           command=lambda: self.ins("tan("), relief=RAISED)
-        buttontan.grid(row=4, column=2, padx=3, pady=3)
-        buttontan.config(font=("Courier New", 18))
-
-        buttonans = Button(basicCalculatorWindow, text="ANS", width=3, command=lambda: self.ins("ANS"), relief=RAISED)
-        buttonans.grid(row=9, column=3, padx=3, pady=3)
-        buttonans.config(font=("Courier New", 18))
-
-        buttonpi = Button(basicCalculatorWindow, text="π", width=3, command=lambda: self.ins("π"), relief=RAISED)
-        buttonpi.grid(row=9, column=2, padx=3, pady=3)
-        buttonpi.config(font=("Courier New", 18))
+    def drawbuttons(self):
+        self.createbutton("one", "1", 3, 0, 8, 5, 5, 18, self.ins, "1", None, None, None,
+                          None, None)
+        self.createbutton("two", "2", 3, 1, 8, 5, 5, 18, self.ins, "2", None, None, None,
+                          None, None)
+        self.createbutton("three", "3", 3, 2, 8, 5, 5, 18, self.ins, "3", None, None, None,
+                          None, None)
+        self.createbutton("four", "4", 3, 0, 7, 5, 5, 18, self.ins, "4", None, None, None,
+                          None, None)
+        self.createbutton("five", "5", 3, 1, 7, 5, 5, 18, self.ins, "5", None, None, None,
+                          None, None)
+        self.createbutton("six", "6", 3, 2, 7, 5, 5, 18, self.ins, "6", None, None, None,
+                          None, None)
+        self.createbutton("seven", "7", 3, 0, 6, 5, 5, 18, self.ins, "7", None, None, None,
+                          None, None)
+        self.createbutton("eight", "8", 3, 1, 6, 5, 5, 18, self.ins, "8", None, None, None,
+                          None, None)
+        self.createbutton("nine", "9", 3, 2, 6, 5, 5, 18, self.ins, "9", None, None, None,
+                          None, None)
+        self.createbutton("zero", "0", 3, 0, 9, 5, 5, 18, self.ins, "0", None, None, None,
+                          None, None)
+        self.createbutton("dot", ".", 3, 1, 9, 5, 5, 18, self.ins, ".", None, None, None,
+                          None, None)
+        self.createbutton("add", "+", 3, 4, 8, 5, 5, 18, self.ins, "+", None, None, None,
+                          None, None)
+        self.createbutton("multiply", "*", 3, 3, 7, 5, 5, 18, self.ins, "*", None, None,
+                          None, None, None)
+        self.createbutton("subtract", "-", 3, 3, 8, 5, 5, 18, self.ins, "-", None, None,
+                          None, None, None)
+        self.createbutton("divide", "/", 3, 4, 7, 5, 5, 18, self.ins, "/", None, None, None,
+                          None, None)
+        self.createbutton("subtract", "-", 3, 3, 8, 5, 5, 18, self.ins, "-", None, None,
+                          None, None, None)
+        self.createbutton("open bracket", "(", 3, 1, 5, 5, 5, 18, self.ins, "(", "black",
+                          "white", None, None, None)
+        self.createbutton("close bracket", ")", 3, 2, 5, 5, 5, 18, self.ins, ")", "black",
+                          "white", None, None, None)
+        self.createbutton("button squared", "^2", 3, 3, 5, 5, 5, 18, self.ins, "^2",
+                          "black", "white", None, None, None)
+        self.createbutton("exponent", "^x", 3, 4, 5, 5, 5, 18, self.ins, "^", "black",
+                          "white", None, None, None)
+        self.createbutton("sin", "sin", 5, 0, 4, 5, 3, 10, self.ins, "sin(", "black",
+                          "white", "arcsin", self.ins, "arcsin(")
+        self.createbutton("cos", "cos", 5, 1, 4, 5, 3, 10, self.ins, "cos(", "black",
+                          "white", "arccos", self.ins, "arccos(")
+        self.createbutton("tan", "tan", 5, 2, 4, 5, 3, 10, self.ins, "tan(", "black",
+                          "white", "arctan", self.ins, "arctan(")
+        self.createbutton("ANS", "ANS", 3, 3, 9, 5, 5, 18, self.ins, "ANS", None, None,
+                          None, None, None)
+        self.createbutton("pi", "π", 3, 2, 9, 5, 5, 18, self.ins, "π", None, None, None,
+                          None, None)
+        self.createbutton("execute", "EXE", 3, 4, 9, 5, 5, 18, self.calculate, None, None,
+                          None, None, None, None)
+        self.createbutton("clear", "AC", 3, 4, 6, 5, 5, 18, self.clear, None, "royalblue3",
+                          None, None, None, None)
+        self.createbutton("delete", "DEL", 3, 3, 6, 5, 5, 18, self.delete, None,
+                          "royalblue3", None, None, None, None)
+        self.createbutton("down", "↓", 3, 1, 2, 5, 5, 18, None, None, "ivory4", None, None,
+                          None, None)
+        self.createbutton("up", "↑", 3, 1, 1, 5, 5, 18, None, None, "ivory4", None, None,
+                          None, None)
+        self.createbutton("left", "←", 3, 0, 2, 5, 5, 18, self.move, -1, "ivory4", None,
+                          None, None, None)
+        self.createbutton("left", "→", 3, 2, 2, 5, 5, 18, self.move, 1, "ivory4", None,
+                          None, None, None)
+        self.createbutton("form", "S⇔D", 3, 0, 5, 5, 5, 18, self.form, None, "black",
+                          "white", None, None, None)
+        self.createbutton("shift", "⇧", 3, 0, 3, 5, 5, 18, self.toggleshift, None, "black",
+                          "gold", None, None, None)
 
     def delete(self):
+        # this command deletes the last item in the result box before the cursor
         self.justcalculated = False
+        # sets justcalculated to false, so when you insert other strings, ANS does not appear
         pos = self.resultbox.index(INSERT)
         if pos > 0:
             self.resultbox.delete(pos - 1)
+            # given that the cursor position is greater than 0, delete the last thing before it
+
+    def toggleshift(self):
+        self.shift = not self.shift
+        self.drawbuttons()
 
     def clear(self):
         # this is the command to clear the result box, either called manually by the user, or done before inserting
@@ -196,12 +150,15 @@ class BasicCalculator:
     def ins(self, val):
         # inserts the "val" parameter into the end of the result box, this is used when pressing any button,
         # and when receiving a result
-        if self.justcalculated and val in ["+", "-", "*", "/"]:
-            # checks if ANS would be appropriate to insert
-            self.clear()
-            self.resultbox.insert(END, "ANS")
+        if self.justcalculated:
+            if val in ["+", "-", "*", "/"]:
+                # checks if ANS would be appropriate to insert
+                self.clear()
+                self.resultbox.insert(END, "ANS")
+            else:
+                self.clear()
+            self.justcalculated = False
         self.resultbox.insert(END, val)
-        # self.answers[-1] + val
 
     def up(self):
         pass
@@ -209,44 +166,49 @@ class BasicCalculator:
     def form(self):
         result = self.resultbox.get()
         if result == "3.141592653589793":
-            self.clear()
-            self.ins("π")
+            # if the result is the decimal approximation of pi, replace it with the symbol "π"
+            self.clear_and_insert("π")
         elif "/" not in result and "π" not in result:
+            # given that the result is not already represented as a fraction, or is pi, attempt to do so
             try:
-                self.clear()
                 ratio = Fraction(result).limit_denominator()
-                self.ins(str(ratio))
+                # use the fraction module to represent the result as a ratio
+                self.clear_and_insert(str(ratio))
             except:
                 pass
+                # if any errors are encountered, simply ignore them and continue
         else:
             self.calculate()
 
     def clear_and_insert(self, result):
         self.clear()
         self.ins(result)
+        # a function to reduce the number of lines needed to clear the answer box and immediately insert into it
 
     def error(self, result):
-        self.clear()
-        self.ins("Error")
+        self.clear_and_insert("Error")
         self.resultbox.after(1000, lambda: self.clear_and_insert(result))
+        # clears the "Error" message after 1000ms, using the after method in tkinter
 
-    def right(self):
-        position = self.resultbox.index(INSERT) + 1
-        self.resultbox.icursor(position)
-
-    def left(self):
-        position = self.resultbox.index(INSERT) - 1
+    def move(self, value):
+        position = self.resultbox.index(INSERT) + value
         self.resultbox.icursor(position)
 
     def calculate(self):
         initialresult = self.resultbox.get()
         try:
             result = initialresult
-            result = result.replace("sin(", "sp.sin(")
+            result = result.replace("arcsin(", "__TEMP_ARCSIN__")
+            result = result.replace("sin(", "math.sin(")
+            result = result.replace("__TEMP_ARCSIN__", "sympy.asin(")
             print(result)
-            result = result.replace("cos(", "sp.cos(")
+            result = result.replace("arccos(", "__TEMP_ARCCOS__")
+            result = result.replace("cos(", "math.cos(")
+            result = result.replace("__TEMP_ARCCOS__", "sympy.acos(")
             print(result)
-            result = result.replace("tan(", "sp.tan(")
+            result = result.replace("arccos(", "__TEMP_ARCTAN__")
+            result = result.replace("tan(", "math.tan(")
+            result = result.replace("__TEMP_ARCTAN__", "sympy.atan(")
             print(result)
             result = re.sub(r'(\d|π|ANS)(\()', r'\1*(', result)
             print(result)
@@ -262,7 +224,7 @@ class BasicCalculator:
             print(result)
             result = result.replace("ANS", "self.ANS")
             print(result)
-            result = result.replace("π", "sp.pi")
+            result = result.replace("π", "math.pi")
             print(result)
             result = result.replace("^", "**")
             print(result)
@@ -270,27 +232,23 @@ class BasicCalculator:
             print(answer)
             print(type(answer))
             # evaluate the string in the result box
-            print(answer)
-            print(type(answer))
-            answer = sp.S(answer)
-            answer = answer.evalf()
-            print(answer)
-            print(type(answer))
-            if isinstance(answer, (sp.Integer, sp.core.numbers.One, sp.core.numbers.Zero, sp.core.numbers.NegativeOne)):
-                answer = int(answer)
-            elif isinstance(answer, sp.Float):
-                pass
-            elif answer.is_integer():
-                print(type(answer))
-                answer = int(answer)
-                # makes the numbers integers if possible, for example without this, if I did the calculation "1/1",
-                # I would have gotten 1.0. it is generally cleaner and more appealing to look at the result as a whole
-                # number if it is possible
-                print(answer)
-            self.clear()
-            # clear the result box
-            self.ins(answer)
-            # insert the answer into the result box
+            if "sympy" in str(type(answer)):
+                if not "sympy.core.mul.Mul" == str(type(answer)):
+                     float(answer)
+            else:
+                if abs(answer) < 1e-10:
+                    answer = 0
+                if answer.is_integer():
+                    print(type(answer))
+                    answer = int(answer)
+                    # makes the numbers integers if possible, for example without this, if I did the calculation "1/1",
+                    # I would have gotten 1.0. it is generally cleaner and more appealing to look at the result as a whole
+                    # number if it is possible
+                    print(answer)
+            answer = str(answer)
+            answer = answer.replace("pi", "π")
+            self.clear_and_insert(answer)
+            # clear the result box and insert the answer into the result box
             self.justcalculated = True
             # set justcalculated to be true so ANS can be used for the next calculation
             self.ANS = answer
