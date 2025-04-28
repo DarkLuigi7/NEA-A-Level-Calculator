@@ -10,6 +10,9 @@ from PIL import Image, ImageTk
 class QuadraticSolver:
     # creating the quadratic solver class for the window
     def __init__(self, root):
+
+        self.complex_mode = False
+
         quadraticSolverWindow = Toplevel(root)
         quadraticSolverWindow.title("Quadratic Solver")
         quadraticSolverWindow.geometry("400x200")
@@ -63,9 +66,13 @@ class QuadraticSolver:
         # create a label, showing equals zero at the end of the equation
 
         buttonsolve = Button(quadraticSolverWindow, text="Solve", width=12, command=self.solve, relief=RAISED)
-        buttonsolve.grid(row=1, column=0, columnspan=11, pady=10)
+        buttonsolve.grid(row=1, column=0, pady=10, padx=10, columnspan=6)
         buttonsolve.config(font=("Courier New", 18))
         # add a button to solve the equation, with command being the function solve
+
+        complex_checkbox = Checkbutton(quadraticSolverWindow, text="Complex", command=self.toggle_complex_mode, font=("Courier New", 12))
+        complex_checkbox.grid(row=1, column=7, pady=10, padx=15, columnspan=3)
+        self.complex_checkbox = complex_checkbox
 
         x1label = Label(quadraticSolverWindow, text="x1 :")
         x1label.config(font=("Courier New", 18))
@@ -89,12 +96,32 @@ class QuadraticSolver:
         self.x2box = x2box
         # add a box to display the first solution to the equation
 
+    def toggle_complex_mode(self):
+        if self.complex_mode:
+            self.complex_mode = False
+        else:
+            self.complex_mode = True
+
+
     def solve(self):
         # this method solves the quadratic equation, given three coefficients
-        a = eval(self.coeffbox1.get())
-        b = eval(self.coeffbox2.get())
-        c = eval(self.coeffbox3.get())
-        # grab the coefficients from the boxes in the window
+        # noinspection PyBroadException
+        try:
+            a = eval(self.coeffbox1.get())
+            b = eval(self.coeffbox2.get())
+            c = eval(self.coeffbox3.get())
+        except:
+            self.x1box.insert(END, "Error")
+            self.x2box.insert(END, "Error")
+            return
+
+        if not (type(a) in (int, float) or type(b) in (int, float) or type(c) in (int, float)):
+            self.x1box.insert(END, "Error")
+            self.x2box.insert(END, "Error")
+            return
+
+        # evaluate the contents of the boxes in the window so that math.sqrt(2), for example is accepted as a valid
+        # coefficient
         x = []
         # create an empty array to place the answer(s) in once done
         try:
@@ -103,25 +130,27 @@ class QuadraticSolver:
             # quadratic equation is applied on the three coefficients
         except ValueError:
             # given that the answer is complex, and the complex mode is turned on, give the answer in the form a+bi
-            if True:
+            if self.complex_mode:
                 # checking if the complex mode is turned on
                 cmplx = ((-b + cmath.sqrt(b ** 2 - 4 * a * c)) / 2 * a)
                 # use cmath to complete a square root function on a negative number, with the quadratic formula,
                 # and store the result as a complex object in a variable: cmplx
                 alpha = cmplx.real
+                print(alpha)
                 # let alpha equal the real part of the complex number "cmplx"
-                if alpha.is_integer:
+                if alpha.is_integer():
                     alpha = int(alpha)
+                    print(alpha)
                     # given that alpha is an integer, convert it to the integer file type to eliminate results like:
                     # "1.0"
-                    pass
                 beta = cmplx.imag
+                print(beta)
                 # let beta equal the imaginary part of the complex number "cmplx"
-                if beta.is_integer:
+                if beta.is_integer():
                     beta = int(beta)
+                    print(beta)
                     # given that beta is an integer, convert it to the integer file type to eliminate results like:
                     # "1.0"
-                    pass
                 x.append(f"{alpha}+{beta}i")
                 # append to the array x the complex number given as a string
             else:
@@ -134,7 +163,7 @@ class QuadraticSolver:
             # quadratic equation is applied on the three coefficients
         except ValueError:
             # given that the answer is complex, and the complex mode is turned on, give the answer in the form a+bi
-            if True:
+            if self.complex_mode:
                 # checking if the complex mode is turned on
                 cmplx = ((-b - cmath.sqrt(b ** 2 - 4 * a * c)) / 2 * a)
                 # use cmath to complete a square root function on a negative number, with the quadratic formula,
