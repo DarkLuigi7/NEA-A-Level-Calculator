@@ -7,6 +7,7 @@ import numpy as np
 
 class SimultaneousSolver:
     def __init__(self, root):
+        self.answers = None
         self.simultaneousSolverWindow = Toplevel(root)
         self.simultaneousSolverWindow.title("Simultaneous Equation Solver")
         # create a class passing root variable in initialise function to create a toplevel window of the main menu
@@ -59,7 +60,7 @@ class SimultaneousSolver:
                 coefficients_row = [float(entry.get()) if entry.get() else 0 for entry in row]
                 # list comprehension to create an array containing the number written in every entry in the row,
                 # (on the left hand side of the equals sign) if there is nothing in the entry box, simply input 0
-            except ValueError:
+            except (ValueError, UnboundLocalError):
                 # if converting the results from the results boxes into floats returns an error
                 for item in self.solutions:
                     item.insert(END, "Error")
@@ -73,7 +74,17 @@ class SimultaneousSolver:
         vector = np.array(vector_values)
         # convert the coefficients and vector values two-dimensional arrays into numpy arrays so matrix calculations
         # can be applied to them
-        self.answers = np.linalg.solve(coefficients, vector)
+        try:
+            self.answers = np.linalg.solve(coefficients, vector)
+            self.answers = [f"{x:.2f}" for x in self.answers]
+            # solve the matrices to find the answers, and round the numbers to three decimal places
+        except np.linalg.LinAlgError:
+            # if the matrices come back as singular, there is no solution, so write nosol meaning no solution
+            # into the unknown boxes
+            for item in self.solutions:
+                item.delete(0, "end")
+                item.insert(END, "nosol")
+            return
         # numpy's linalg function uses matrix calculations to solve systems of simultaneous equations
         index = 0
         # set the index to 0

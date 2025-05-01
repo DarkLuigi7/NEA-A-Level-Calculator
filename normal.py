@@ -118,52 +118,57 @@ class Normal:
         sigma = self.sigma_entry.get()
         mu = self.mu_entry.get()
         # get the results from the sigma and mu entry boxes
-        if float(sigma) < 0:
-            error_text = "standard deviation must be positive"
-            self.result_label.config(text=error_text)
-            # perform a check to verify that standard deviation (sigma) is positive
-            # which it must be to complete this calculation
-        else:
-            sigma = float(sigma)
-            mu = float(mu)
-            # convert the sigma and mu variables to floats
-            if self.tail_type.get() == "≤X≤":
-                lower = float(self.lower_entry.get())
-                upper = float(self.upper_entry.get())
-                # given that the tail type is ≤X≤, get the lower and upper bound values as floats
-                if lower >= upper:
-                    error_text = "the upper bound must be greater than the lower bound"
-                    self.result_label.config(text=error_text)
-                    # self-explanatory, a lower bound must be lower and an upper bound must be greater
+        try:
+            if float(sigma) < 0:
+                error_text = "standard deviation must be positive"
+                self.result_label.config(text=error_text)
+                # perform a check to verify that standard deviation (sigma) is positive
+                # which it must be to complete this calculation
+            else:
+                sigma = float(sigma)
+                mu = float(mu)
+                # convert the sigma and mu variables to floats
+                if self.tail_type.get() == "≤X≤":
+                    lower = float(self.lower_entry.get())
+                    upper = float(self.upper_entry.get())
+                    # given that the tail type is ≤X≤, get the lower and upper bound values as floats
+                    if lower >= upper:
+                        error_text = "the upper bound must be greater than the lower bound"
+                        self.result_label.config(text=error_text)
+                        # self-explanatory, a lower bound must be lower and an upper bound must be greater
+                    else:
+                        probability = self.normal_cdf(upper, mu, sigma) - self.normal_cdf(lower, mu, sigma)
+                        # find the results when the cumulative distribution function is applied with the parameters
+                        # given, and with the upper and lower bounds, then subtract these two to find the probability
+                        # between these two bounds
+                        formatted_probability = f"{probability:.6f}"
+                        # round this probability to 6 decimal places
+                        result_text = f"P({lower} ≤ X ≤ {upper}) = \n{formatted_probability}"
+                        # this will show the result as this, for example:
+                        #     P(3.0 ≤X≤ 5.0) =
+                        #       0.382925
+
                 else:
-                    probability = self.normal_cdf(upper, mu, sigma) - self.normal_cdf(lower, mu, sigma)
-                    # find the results when the cumulative distribution function is applied with the parameters
-                    # given, and with the upper and lower bounds, then subtract these two to find the probability
-                    # between these two bounds
+                    x = float(self.x_entry.get())
+                    # if the tail type is not between two bounds, simply get the x value
+                    if self.tail_type.get() == "X≥":
+                        probability = 1 - self.normal_cdf(x, mu, sigma)
+                        # if the tail type is X≥ the probability is 1 take the cumulative distribution function
+                    else:
+                        # otherwise, the tail type is X≤ and the probability simply the cumulative distribution function
+                        probability = self.normal_cdf(x, mu, sigma)
+
                     formatted_probability = f"{probability:.6f}"
                     # round this probability to 6 decimal places
-                    result_text = f"P({lower} ≤ X ≤ {upper}) = \n{formatted_probability}"
+
+                    result_text = f"P({self.tail_type.get()} {x}) = \n{formatted_probability}"
                     # this will show the result as this, for example:
-                    #     P(3.0 ≤X≤ 5.0) =
-                    #       0.382925
+                    #   P(X≤ 4.0) =
+                    #     0.736742
 
-            else:
-                x = float(self.x_entry.get())
-                # if the tail type is not between two bounds, simply get the x value
-                if self.tail_type.get() == "X≥":
-                    probability = 1 - self.normal_cdf(x, mu, sigma)
-                    # if the tail type is X≥ the probability is 1 take the cumulative distribution function
-                else:
-                    # otherwise, the tail type is X≤ and the probability simply the cumulative distribution function
-                    probability = self.normal_cdf(x, mu, sigma)
-
-                formatted_probability = f"{probability:.6f}"
-                # round this probability to 6 decimal places
-
-                result_text = f"P({self.tail_type.get()} {x}) = \n{formatted_probability}"
-                # this will show the result as this, for example:
-                #   P(X≤ 4.0) =
-                #     0.736742
-
-            self.result_label.config(text=result_text)
-            # configure the result_label to have the text inside the variable result_text
+                self.result_label.config(text=result_text)
+                # configure the result_label to have the text inside the variable result_text
+        except:
+            error_text = "Error"
+            self.result_label.config(text=error_text)
+            # check for any other miscellaneous errors

@@ -76,7 +76,7 @@ class Binomial:
             # create two labels and entry boxes representing the inputs for the upper and lower bound of the tails
 
         else:
-            Label(self.input_frame, text="X:").grid(row=0, column=0, padx=5)
+            Label(self.input_frame, text="x:").grid(row=0, column=0, padx=5)
             self.x_entry = Entry(self.input_frame)
             self.x_entry.grid(row=0, column=1, padx=5)
 
@@ -116,80 +116,115 @@ class Binomial:
         n = self.n_entry.get()
         p = self.p_entry.get()
         # get the results from the numtrial and probability entry boxes
-        if not float(n).is_integer():
-            error_text = "number of trials must be an integer"
-            self.result_label.config(text=error_text)
-            # perform a check to see if the number of trials is an integer, which it, along with every variable other
-            # than probability must be to complete this calculation
-        elif float(p) > 1 or float(p) < 0:
-            error_text = "probability must be between 0 and 1"
-            self.result_label.config(text=error_text)
-            # perform a check to see if the inputted probability is inbetween 0 and 1
-            # which is what a probability is, by definition
-        else:
-            n = int(n)
-            p = float(p)
-            # convert the n variable to an integer and the p variable to a float
-            if self.tail_type.get() == "≤X≤":
-                lower = float(self.lower_entry.get())
-                upper = float(self.upper_entry.get())
-                # given that the tail type is ≤X≤, get the lower and upper bound values as floats
-                if not lower.is_integer() or not upper.is_integer():
-                    error_text = "both bounds must be integers"
-                    self.result_label.config(text=error_text)
-                    # check if both bounds can be expressed as integers
-                elif not (0 <= lower <= n and 0 <= upper <= n):
-                    error_text = "both bounds must be inbetween 0 and the number of trials"
-                    self.result_label.config(text=error_text)
-                    # check if both bounds lie within the range of 0 and the number of trials
-                elif lower > upper:
-                    error_text = "the lower bound must be less than or equal to the upper bound"
-                    self.result_label.config(text=error_text)
-                    # check that the lower bound is in fact the lower of the two bounds
-                else:
-                    # given that the variables inputted have passed these tests...
-                    probability = 0
-                    # initialise the final probability variable and set it to 0
-                    for k in range(int(lower), int(upper)):
-                        # for every integer k from the lower bound to the upper bound
-                        nCp = math.factorial(n) / (math.factorial(k) * math.factorial(n - k))
-                        # define the result of the combination function of n and k as nCp
-                        probability += nCp * p ** k * (1 - p) ** (n - k)
-                        # add to the probability variable the result of the probability mass function for binomial
-                        # distribution with the given parameters for each integer k
-
-                        formatted_probability = f"{probability:.6f}"
-                        # round this probability to 6 decimal places
-                        result_text = f"P({lower} ≤ X ≤ {upper}) = \n{formatted_probability}"
-                        # this will show the result as this, for example:
-                        #     P(3.0 ≤X≤ 5.0) =
-                        #       0.546875
+        try:
+            if not float(n).is_integer():
+                error_text = "number of trials must be an integer"
+                self.result_label.config(text=error_text)
+                # perform a check to see if the number of trials is an integer, which it, along with every variable other
+                # than probability must be to complete this calculation
+            elif float(p) > 1 or float(p) < 0:
+                error_text = "probability must be between 0 and 1"
+                self.result_label.config(text=error_text)
+                # perform a check to see if the inputted probability is inbetween 0 and 1
+                # which is what a probability is, by definition
             else:
-                x = self.x_entry.get()
-                # if tail_type is not ≤X≤, simply get the x value
-                if not float(x).is_integer():
-                    error_text = "number of successes must be an integer"
-                    self.result_label.config(text=error_text)
-                    # check if the number of successes can be expressed as integers
-                elif not (0 <= int(x) <= n):
-                    error_text = "number of successes must be inbetween 0 and the number of trials"
-                    self.result_label.config(text=error_text)
-                    # check that the number of successes lies within the range of 0 and the number of trials
+                n = int(n)
+                p = float(p)
+                # convert the n variable to an integer and the p variable to a float
+                if self.tail_type.get() == "≤X≤":
+                    lower = float(self.lower_entry.get())
+                    upper = float(self.upper_entry.get())
+                    # given that the tail type is ≤X≤, get the lower and upper bound values as floats
+                    if not lower.is_integer() or not upper.is_integer():
+                        error_text = "both bounds must be integers"
+                        self.result_label.config(text=error_text)
+                        # check if both bounds can be expressed as integers
+                    elif not (0 <= lower <= n and 0 <= upper <= n):
+                        error_text = "both bounds must be inbetween 0 and the number of trials"
+                        self.result_label.config(text=error_text)
+                        # check if both bounds lie within the range of 0 and the number of trials
+                    elif lower > upper:
+                        error_text = "the lower bound must be less than or equal to the upper bound"
+                        self.result_label.config(text=error_text)
+                        # check that the lower bound is in fact the lower of the two bounds
+                    else:
+                        # given that the variables inputted have passed these tests...
+                        probability = 0
+                        # initialise the final probability variable and set it to 0
+                        for k in range(int(lower), int(upper)):
+                            # for every integer k from the lower bound to the upper bound
+                            nCp = math.factorial(n) / (math.factorial(k) * math.factorial(n - k))
+                            # define the result of the combination function of n and k as nCp
+                            probability += nCp * p ** k * (1 - p) ** (n - k)
+                            # add to the probability variable the result of the probability mass function for binomial
+                            # distribution with the given parameters for each integer k
+
+                            formatted_probability = f"{probability:.6f}"
+                            # round this probability to 6 decimal places
+                            result_text = f"P({lower} ≤ X ≤ {upper}) = \n{formatted_probability}"
+                            # this will show the result as this, for example:
+                            #     P(3.0 ≤X≤ 5.0) =
+                            #       0.546875
                 else:
-                    # given that none of these errors have been triggered...
-                    x = int(x)
-                    # get the x value as an integer
-                    nCp = math.factorial(n) / (math.factorial(x) * math.factorial(n - x))
-                    # define the result of the combination function of n and k as nCp
-                    probability = nCp * p ** x * (1 - p) ** (n - x)
-                    # set probability variable the result of the probability mass function for binomial distribution
-                    # with the given parameters
-                    formatted_probability = f"{probability:.6f}"
-                    # round this probability to 6 decimal places
-                    result_text = f"P({self.tail_type.get()} {x}) = \n{formatted_probability}"
-                    # this will show the result as this, for example:
-                    #   P(X≤ 4.0) =
-                    #    0.200121
+                    x = self.x_entry.get()
+                    # if tail_type is not ≤X≤, simply get the x value
+                    if not float(x).is_integer():
+                        error_text = "number of successes must be an integer"
+                        self.result_label.config(text=error_text)
+                        # check if the number of successes can be expressed as integers
+                    elif not (0 <= int(x) <= n):
+                        error_text = "number of successes must be inbetween 0 and the number of trials"
+                        self.result_label.config(text=error_text)
+                        # check that the number of successes lies within the range of 0 and the number of trials
+                    else:
+                        # given that none of these errors have been triggered...
+                        x = int(x)
+                        # get the x value as an integer
+                        if self.tail_type.get() == "X≤":
+                            probability = 0
+                            for k in range(x + 1):
+                                nCp = math.factorial(n) / (math.factorial(k) * math.factorial(n - k))
+                                # define the result of the combination function of n and k as nCp
+                                probability += nCp * p ** k * (1 - p) ** (n - k)
+                                # add to the probability variable the result of the probability mass function for binomial
+                                # distribution with the given parameters
+                            formatted_probability = f"{probability:.6f}"
+                            # round this probability to 6 decimal places
+                            result_text = f"P(X ≤ {x}) = \n{formatted_probability}"
+                            # this will show the result as this, for example:
+                            #   P(X≤ 4.0) =
+                            #    0.200121
+                        elif self.tail_type.get() == "X≥":
+                            probability = 0
+                            for k in range(x, n + 1):
+                                nCp = math.factorial(n) / (math.factorial(k) * math.factorial(n - k))
+                                # define the result of the combination function of n and k as nCp
+                                probability += nCp * p ** k * (1 - p) ** (n - k)
+                                # add to the probability variable the result of the probability mass function for binomial
+                                # distribution with the given parameters
+                            formatted_probability = f"{probability:.6f}"
+                            # round this probability to 6 decimal places
+                            result_text = f"P(X ≥ {x}) = \n{formatted_probability}"
+                            # this will show the result as this, for example:
+                            #   P(X ≥ 4.0) =
+                            #    0.200121
+                        elif self.tail_type.get() == "X=":
+                            nCp = math.factorial(n) / (math.factorial(x) * math.factorial(n - x))
+                            # define the result of the combination function of n and x as nCp
+                            probability = nCp * p ** x * (1 - p) ** (n - x)
+                            # set  the probability variable the to result of the probability mass function for binomial
+                            # distribution with the given parameters
+                            formatted_probability = f"{probability:.6f}"
+                            # round this probability to 6 decimal places
+                            result_text = f"P(X = {x}) = \n{formatted_probability}"
+                            # this will show the result as this, for example:
+                            #   P(X = 4.0) =
+                            #    0.200121
 
             self.result_label.config(text=result_text)
             # configure the result_label to have the text inside the variable result_text
+        except:
+            error_text = "Error"
+            self.result_label.config(text=error_text)
+            # check for any other miscellaneous errors
+

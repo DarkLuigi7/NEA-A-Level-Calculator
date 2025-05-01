@@ -1,10 +1,10 @@
 from tkinter import *
 from tkinter import ttk
 import numpy as np
-import matplotlib.pyplot as plt
-from turtle import*
+from turtle import *
 import math
 from turtlegraph import Plotter
+
 
 # import required libraries
 
@@ -15,6 +15,7 @@ class CreateEquation:
         self.colour = colour
     # create a class responsible for creating objects representing functions to be graphed passing all attributes of
     # every function, so they can be passed to the turtle graphing file to draw
+
 
 class Grapher:
     def __init__(self, root):
@@ -98,7 +99,6 @@ class Grapher:
         frame.destroy()
         # destroy the frame object using the tkinter destroy method
 
-
     def plot_graph(self):
         # this method is called when the graph button is pressed
         if not self.equations:
@@ -109,20 +109,3 @@ class Grapher:
         # otherwise, create an object of the class Plotter from the file turtlegraph.py
         plotter.plot()
         # call the plot method of the object we have just created to draw the graph
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

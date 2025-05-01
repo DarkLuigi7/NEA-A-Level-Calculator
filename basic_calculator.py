@@ -198,6 +198,7 @@ class BasicCalculator:
         # set just calculated to false so ANS does not appear
 
     def ins(self, val):
+        val = str(val)
         self.assignment_mode = False
         # inserts the "val" parameter into the end of the result box, this is used when pressing any button,
         # and when receiving a result
@@ -205,12 +206,12 @@ class BasicCalculator:
             if val in ["+", "-", "*", "/"]:
                 # checks if ANS would be appropriate to insert
                 self.clear()
-                self.resultbox.insert(END, "ANS")
+                self.resultbox.insert("end", "ANS")
                 # if so, clear the answer box, and insert
             else:
                 self.clear()
             self.just_calculated = False
-        self.resultbox.insert(END, val)
+        self.resultbox.insert("end", val)
 
     def up(self):
         if self.max_answers_index == -1 or self.answers_index == 0:
@@ -301,14 +302,13 @@ class BasicCalculator:
                         # if the string var is any of the characters in the given set
                         self.variable_dictionary[var] = self.calculate(value)
                         # change the corresponding value of the variable in the variable_dictionary to the given value
-                        self.clear_and_insert(var)
+                        return var
                         # clear the result box and re-insert the variable
-                        return
-                        # stop the method here
                     else:
                         self.error(initial_result)
                         # if the variable given is not x y or z call the error method with parameter initial_result
-                        return
+                        return "Error"
+                        # return "Error" to stop the method and print "Error" into the answer box
 
             result = initial_result
             # the following lines of code ensure that the inputted result is a valid mathematical python expression
@@ -333,6 +333,12 @@ class BasicCalculator:
             result = re.sub(r'(\))\s*(\()', r')*(', result)
             # this replaces implicit multiplication where any closing bracket is directly to the left of an opening
             # bracket with explicit multiplication by adding a "*" eg; (3)(4) becomes (3)*(4)
+            for variable in self.variable_dictionary:
+                # for each variable in the dictionary
+                if self.variable_dictionary[variable] is not None:
+                    # given that the variable has a corresponding value in the dictionary
+                    result = result.replace(variable, self.variable_dictionary[variable])
+                    # replace every instance (if any) of the variable in the result string with its corresponding value
             result = result.replace("arcsin(", "__TEMP_ARCSIN__")
             # I am using temporary strings here otherwise later on when I replace sin, I could result in something
             # that was originally arcsin( becoming sympy.asympy.sin(
@@ -360,21 +366,15 @@ class BasicCalculator:
             # replace any instance of π in the string with the math module attribute math.e
             result = result.replace("^", "**")
             # replace any instance of ^ in the string with the python exponent **
-            for variable in self.variable_dictionary:
-                # for each variable in the dictionary
-                if self.variable_dictionary[variable] is not None:
-                    # given that the variable has a corresponding value in the dictionary
-                    result = result.replace(variable, self.variable_dictionary[variable])
-                    # replace every instance (if any) of the variable in the result string with its corresponding value
 
             try:
                 answer = eval(result)
                 # try to evaluate the result using the python eval function
             except:
-                self.error(result)
-                # if this fails call the error method with the result parameter
-                return
-                # return to end the function
+                self.error(initial_result)
+                # if this fails call the error method with the initial_result parameter
+                return "Error"
+                # return "Error" to end the function and insert error into the answer box
 
             if "sympy" in result:
                 # if there is a sympy expression in the evaluated result use the sympy evaluate method to evaluate it
@@ -389,6 +389,9 @@ class BasicCalculator:
                     if abs(answer - 0.5) < 1e-10:
                         answer = 0.5
                         # if the answer is cose to 0.5 with a tolerance of 10^-10 set the answer to 0.5
+                    if abs(answer) < 1e-10:
+                        answer = 0
+                        # if the answer is cose to 0 with a tolerance of 10^-10 set the answer to 0
                     if answer.is_integer():
                         answer = int(answer)
                         # if the answer is a float that can be expressed as an integer
@@ -416,6 +419,7 @@ class BasicCalculator:
         except Exception as e:
             # if any part of the calculate method fails
             self.error(initial_result)
+            return "Error"
             # call the error method with parameter initial_result
             traceback.print_exc()
             # print the most recent exception traceback to the console

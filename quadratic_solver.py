@@ -70,7 +70,8 @@ class QuadraticSolver:
         buttonsolve.config(font=("Courier New", 18))
         # add a button to solve the equation, with command being the function solve
 
-        complex_checkbox = Checkbutton(quadraticSolverWindow, text="Complex", command=self.toggle_complex_mode, font=("Courier New", 12))
+        complex_checkbox = Checkbutton(quadraticSolverWindow, text="Complex", command=self.toggle_complex_mode,
+                                       font=("Courier New", 12))
         complex_checkbox.grid(row=1, column=7, pady=10, padx=15, columnspan=3)
         self.complex_checkbox = complex_checkbox
 
@@ -102,21 +103,35 @@ class QuadraticSolver:
         else:
             self.complex_mode = True
 
-
     def solve(self):
         # this method solves the quadratic equation, given three coefficients
-        # noinspection PyBroadException
         try:
-            a = eval(self.coeffbox1.get())
-            b = eval(self.coeffbox2.get())
-            c = eval(self.coeffbox3.get())
+            if self.coeffbox1.get() == "":
+                raise ValueError
+                # raise an error if the a coefficient box is empty, as it is no longer a quadratic equation
+            else:
+                a = eval(self.coeffbox1.get())
+            if self.coeffbox2.get() == "":
+                b = 0
+            else:
+                b = eval(self.coeffbox2.get())
+            if self.coeffbox3.get() == "":
+                c = 0
+            else:
+                c = eval(self.coeffbox3.get())
+            # if the box is empty, assume the number is zero, otherwise get the vales from the boxes and assign them to
+            # the coefficient variables
         except:
+            self.x1box.delete(0, "end")
             self.x1box.insert(END, "Error")
+            self.x2box.delete(0, "end")
             self.x2box.insert(END, "Error")
             return
 
         if not (type(a) in (int, float) or type(b) in (int, float) or type(c) in (int, float)):
+            self.x1box.delete(0, "end")
             self.x1box.insert(END, "Error")
+            self.x2box.delete(0, "end")
             self.x2box.insert(END, "Error")
             return
 

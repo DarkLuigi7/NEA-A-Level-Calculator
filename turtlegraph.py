@@ -111,8 +111,12 @@ class Plotter:
         # set the colour of the pen to be the colour assigned to the function
         if func_type == "y=":
             # if the function is in terms of y
-            func = lambda x: eval(func_str)
-            # turn the mathematical function as a python function in terms of a variable x
+            try:
+                func = lambda x: eval(func_str)
+                # turn the mathematical function as a python function in terms of a variable x
+            except:
+                pass
+                # pass if the function is an invalid expression
             for x in np.arange(self.X_MIN, self.X_MAX, 0.01):
                 # start a loop that iterates over values of x between x_min and x_max with a step of 0.01
                 try:
