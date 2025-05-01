@@ -120,11 +120,13 @@ class Binomial:
             if not float(n).is_integer():
                 error_text = "number of trials must be an integer"
                 self.result_label.config(text=error_text)
+                return
                 # perform a check to see if the number of trials is an integer, which it, along with every variable other
                 # than probability must be to complete this calculation
             elif float(p) > 1 or float(p) < 0:
                 error_text = "probability must be between 0 and 1"
                 self.result_label.config(text=error_text)
+                return
                 # perform a check to see if the inputted probability is inbetween 0 and 1
                 # which is what a probability is, by definition
             else:
@@ -138,19 +140,23 @@ class Binomial:
                     if not lower.is_integer() or not upper.is_integer():
                         error_text = "both bounds must be integers"
                         self.result_label.config(text=error_text)
+                        return
                         # check if both bounds can be expressed as integers
                     elif not (0 <= lower <= n and 0 <= upper <= n):
                         error_text = "both bounds must be inbetween 0 and the number of trials"
                         self.result_label.config(text=error_text)
+                        return
                         # check if both bounds lie within the range of 0 and the number of trials
                     elif lower > upper:
                         error_text = "the lower bound must be less than or equal to the upper bound"
                         self.result_label.config(text=error_text)
+                        return
                         # check that the lower bound is in fact the lower of the two bounds
                     else:
                         # given that the variables inputted have passed these tests...
                         probability = 0
                         # initialise the final probability variable and set it to 0
+                        formatted_probability = 0
                         for k in range(int(lower), int(upper)):
                             # for every integer k from the lower bound to the upper bound
                             nCp = math.factorial(n) / (math.factorial(k) * math.factorial(n - k))
@@ -159,22 +165,24 @@ class Binomial:
                             # add to the probability variable the result of the probability mass function for binomial
                             # distribution with the given parameters for each integer k
 
-                            formatted_probability = f"{probability:.6f}"
-                            # round this probability to 6 decimal places
-                            result_text = f"P({lower} ≤ X ≤ {upper}) = \n{formatted_probability}"
-                            # this will show the result as this, for example:
-                            #     P(3.0 ≤X≤ 5.0) =
-                            #       0.546875
+                        formatted_probability = f"{probability:.6f}"
+                        # round this probability to 6 decimal places
+                        result_text = f"P({lower} ≤ X ≤ {upper}) = \n{formatted_probability}"
+                        # this will show the result as this, for example:
+                        #     P(3.0 ≤X≤ 5.0) =
+                        #       0.546875
                 else:
                     x = self.x_entry.get()
                     # if tail_type is not ≤X≤, simply get the x value
                     if not float(x).is_integer():
                         error_text = "number of successes must be an integer"
                         self.result_label.config(text=error_text)
+                        return
                         # check if the number of successes can be expressed as integers
                     elif not (0 <= int(x) <= n):
                         error_text = "number of successes must be inbetween 0 and the number of trials"
                         self.result_label.config(text=error_text)
+                        return
                         # check that the number of successes lies within the range of 0 and the number of trials
                     else:
                         # given that none of these errors have been triggered...

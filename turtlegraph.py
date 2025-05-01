@@ -147,7 +147,7 @@ class Plotter:
                         # and re-enters, if indeed it does re-enter
                     self.t.penup()
                     # lift the pen back up
-                except ValueError:
+                except:
                     # if a value error occurred somewhere in the above code, simply pass instead
                     pass
         elif func_type == "x=":

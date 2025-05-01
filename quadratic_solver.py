@@ -111,6 +111,12 @@ class QuadraticSolver:
                 # raise an error if the a coefficient box is empty, as it is no longer a quadratic equation
             else:
                 a = eval(self.coeffbox1.get())
+                if a == 0:
+                    self.x1box.delete(0, "end")
+                    self.x1box.insert(END, "Error")
+                    self.x2box.delete(0, "end")
+                    self.x2box.insert(END, "Error")
+                    return
             if self.coeffbox2.get() == "":
                 b = 0
             else:

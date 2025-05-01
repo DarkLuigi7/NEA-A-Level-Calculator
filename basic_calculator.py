@@ -231,24 +231,26 @@ class BasicCalculator:
 
         if result in {"π", "e"} or "/" in result:
             self.execute()
-        try:
-            if abs(float(result) - math.pi) < 1e-9:
-                # if the result is the decimal approximation of pi, replace it with the symbol "π"
-                self.clear_and_insert("π")
-            elif abs(float(result) - math.e) < 1e-9:
-                # if the result is the decimal approximation of e, replace it with the letter "e"#
-                self.clear_and_insert("e")
-            elif result not in {"π", "e"} or "/" not in result:
-                # given that the result is not already represented as a fraction, or is pi, attempt to do so
-                ratio = Fraction(result).limit_denominator()
-                # use the fraction module to represent the result as a ratio
-                self.clear_and_insert(str(ratio))
-            else:
-                self.execute()
-        except ValueError:
-            print("there was an error")
-            pass
-            # if any errors are encountered, simply ignore them and continue
+
+        else:
+            try:
+                if abs(float(result) - math.pi) < 1e-9:
+                    # if the result is the decimal approximation of pi, replace it with the symbol "π"
+                    self.clear_and_insert("π")
+                elif abs(float(result) - math.e) < 1e-9:
+                    # if the result is the decimal approximation of e, replace it with the letter "e"#
+                    self.clear_and_insert("e")
+                elif result not in {"π", "e"} or "/" not in result:
+                    # given that the result is not already represented as a fraction, or is pi, attempt to do so
+                    ratio = Fraction(result).limit_denominator()
+                    # use the fraction module to represent the result as a ratio
+                    self.clear_and_insert(str(ratio))
+                else:
+                    self.execute()
+            except ValueError:
+                self.error(result)
+                # if any invalid inputs are given, call the error function with the result as its parameter
+                return "Error"
 
     def clear_and_insert(self, result):
         self.clear()
@@ -358,10 +360,10 @@ class BasicCalculator:
             # replace any instance of __TEMP_ARCTAN__ with a valid sympy expression for arctan
             result = result.replace("ln(", "math.log(")
             # replace any instance of ln( with a valid math expression for natural log
-            result = result.replace("ANS", "self.ANS")
-            # replace any instance of ANS with the object's attribute self.ANS
             result = result.replace("e", "math.e")
             # replace any instance of the letter e in the string with the math module attribute math.e
+            result = result.replace("ANS", "self.ANS")
+            # replace any instance of ANS with the object's attribute self.ANS
             result = result.replace("π", "math.pi")
             # replace any instance of π in the string with the math module attribute math.e
             result = result.replace("^", "**")
@@ -373,6 +375,8 @@ class BasicCalculator:
             except:
                 self.error(initial_result)
                 # if this fails call the error method with the initial_result parameter
+                traceback.print_exc()
+                # print the most recent exception traceback to the console
                 return "Error"
                 # return "Error" to end the function and insert error into the answer box
 
@@ -419,10 +423,10 @@ class BasicCalculator:
         except Exception as e:
             # if any part of the calculate method fails
             self.error(initial_result)
-            return "Error"
-            # call the error method with parameter initial_result
             traceback.print_exc()
             # print the most recent exception traceback to the console
+            return "Error"
+            # call the error method with parameter initial_result
 
     def execute(self):
         # this method is called when the execute button is pressed

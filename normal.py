@@ -132,9 +132,10 @@ class Normal:
                     lower = float(self.lower_entry.get())
                     upper = float(self.upper_entry.get())
                     # given that the tail type is ≤X≤, get the lower and upper bound values as floats
-                    if lower >= upper:
+                    if lower > upper:
                         error_text = "the upper bound must be greater than the lower bound"
                         self.result_label.config(text=error_text)
+                        return
                         # self-explanatory, a lower bound must be lower and an upper bound must be greater
                     else:
                         probability = self.normal_cdf(upper, mu, sigma) - self.normal_cdf(lower, mu, sigma)
